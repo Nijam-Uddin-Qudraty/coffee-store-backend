@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -25,13 +25,27 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const coffeeCollection = client.db('coffeeDB').collection('coffee')
-    app.post('/coffee', async(req,res)=>{
+    app.post('/coffees', async(req,res)=>{
       const newCoffee = req.body;
       console.log(newCoffee);
       const result = await coffeeCollection.insertOne(newCoffee);
+      res.send(result)   
+    })
+    app.get('/coffees',async(req,res)=>{
+      const result = await coffeeCollection.find().toArray();
       res.send(result)
-
-      
+    })
+    app.delete('/coffees/:id', async(req, res)=>{
+      const id = req.params.id
+      const query = {_id : new ObjectId(id)}
+      const result = await coffeeCollection.deleteOne(query)
+      res.send(result)
+    })
+    app.get('/coffees/:id',async(req,res)=>{
+      const id = req.params.id
+      const query = {_id: new ObjectId(id)}
+      const result = await coffeeCollection.findOne(query)
+      res.send(result)
     })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
